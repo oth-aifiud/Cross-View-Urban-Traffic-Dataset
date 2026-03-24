@@ -19,41 +19,41 @@ A dataset of urban intersections recorded simultaneously from a bike-mounted GoP
 
 ---
 
-## Repository Structure
+This pipeline processes synchronized street-view (GoPro on bike) and drone videos
+to produce a cross-view dataset with ground-truth BEV supervision.
 
 ```
-cross-view-urban-traffic/
-│
-├── README.md
-├── LICENSE
-├── requirements.txt
-│
-├── pipeline/                        # Full processing pipeline (6 stages)
-│   ├── 01_generate_camera_params.py     # GoPro intrinsics generation / calibration
-│   ├── 02_extract_frames.py             # Extract frames from video by manifest
-│   ├── 03_match_wedge_frames.py         # Cross-view object matching (street↔drone)
-│   ├── 04_auto_coord_align.py           # Automatic coordinate alignment (IPM-based)
-│   ├── 05_eval_bev.py                   # IPM baseline evaluation
-│   └── 06_bbox_bev_regressor.py         # Detection-conditioned BEV regressor
-│
-├── models/
-│   ├── bev_monolayout.py                # MonoLayout-style image→BEV model
-│   └── bbox_bev_regressor.py            # Lightweight bbox→BEV MLP (recommended)
-│
-├── visualization/
-│   ├── visualize_bbox_regressor.py      # 4-panel BEV figure renderer
-│   └── render_bev_figure.py             # Full pipeline figure with drone overhead
-│
-├── configs/
-│   └── camera_params_example.json       # Example GoPro Hero 11 camera config
-│
-└── docs/
-    ├── PIPELINE.md                      # Step-by-step pipeline guide
-    ├── DATA_FORMAT.md                   # CSV schema documentation
-    └── COORDINATE_SYSTEMS.md            # Coordinate frame definitions
-```
-
----
+Raw Videos (street + drone) with annotations
+        │
+        ▼
+  [post processing for wedge exports]
+        │
+        ▼
+  Street Manifest + Drone Manifest CSVs
+        │
+        ├──► SCRIPT 1: match_wedge_frames.py   ── (Cross-view ID matching)
+        │           │
+        │           ▼
+        │    frame_matches.csv + track_map.csv
+        │           │
+        │     ┌─────┴──────────────────────┐
+        │     ▼                            ▼
+        │  SCRIPT 2: eval_matching.py    SCRIPT 3: dataset_stats.py
+        │  (benchmark: P/R/F1)           
+        │
+        └──► SCRIPT 4: auto_coord_align.py  ── Auto coordinate alignment
+                   │   (uses near matches + optional Depth Anything V2)
+                   ▼
+            coord_align.csv  (replaces manual per-scene measurement)
+                   │
+             ┌─────┴──────────────────────┐───────────────────────────────────────┐
+             ▼                            ▼                                       ▼
+          SCRIPT 5: eval_ipm_bev.py      SCRIPT 6: bev_monolayout.py.          SCRIPT 7: bbox_bev_regressor.py
+          (IPM baseline benchmark)       (learning-based BEV model).           (Detection-Conditioned BEV Position Regressor)
+                                         (train + eval)                        (train + eval) 
+                                          │                                      │
+                                          ▼                                      ▼
+                                        SCRIPT 8: visualize_mono_bev.py        SCRIPT 9: visualize_bbox_regressor.py
 
 ## Installation
 
@@ -78,75 +78,81 @@ matplotlib>=3.7
 
 ## Pipeline
 
-The full pipeline takes raw videos and produces BEV-evaluated results in 6 steps.
-
-### Step 1 — Camera Parameters
+The full pipeline takes raw videos and produces BEV-evaluated resuts.
 
 ```bash
-# Use published GoPro specs (instant, ±1% accuracy for Linear mode)
-python pipeline/01_generate_camera_params.py spec \
-    --model hero11 --fov linear --resolution 4k \
-    --scenes scene_00 scene_01 \
-    --out camera_params.json
+# 1. Cross-view matching
+**Purpose:** Core cross-view ID matching. Matches street tracks to drone tracks
+using CLIP embeddings + angular geometry + distance ranking.
+Runs two passes: near objects (appearance-dominant) and far objects
+(geometry-dominant). Outputs frame-level matches and voted track-level map.
+python match_wedge_frames.py \
+    --street_manifest data/street_manifest.csv \
+    --drone_manifest  data/drone_manifest.csv \
+    --street_emb_npz  embeddings/street_emb.npz \
+    --drone_emb_npz   embeddings/drone_emb.npz \
+    --out_frame_csv   outputs/frame_matches.csv \
+    --out_track_map_csv outputs/track_map.csv
 
-# Or use your own calibrated intrinsics
-# Edit camera_params.json directly — see configs/camera_params_example.json
-```
+# 2. Auto coordinate alignment (depth mode recommended)
+python auto_coord_align.py \
+    --street_manifest   data/street_manifest.csv \
+    --drone_manifest    data/drone_manifest.csv \
+    --frame_matches_csv outputs/frame_matches.csv \
+    --track_map_csv     outputs/track_map.csv \
+    --camera_cfg        data/camera_params.json \
+    --method            depth or ipm \
+    --img_dir           data/frames/ \
+    --out_csv           outputs/coord_align.csv
 
-### Step 2 — Extract Frames
+# 3. Dataset statistics 
+python dataset_stats.py \
+    --street_manifest data/street_manifest.csv \
+    --drone_manifest  data/drone_manifest.csv \
+    --track_map_csv   outputs/track_map.csv \
+    --scene_meta_csv  data/scene_metadata.csv \
+    --out_json        results/dataset_stats.json \
+    --out_csv         results/per_scene_stats.csv
 
-```bash
-python pipeline/02_extract_frames.py \
-    --video    /path/to/street_video.mp4 \
-    --manifest /path/to/street_wedge_manifest.csv \
-    --out_dir  frames/scene_00 \
-    --scene_id scene_00
-```
+# 4. Matching evaluation 
+python eval_matching.py \
+    --gt_csv          annotations/gt_track_map.csv \
+    --pred_track_csv  outputs/track_map.csv \
+    --pred_frame_csv  outputs/frame_matches.csv \
+    --out_report      results/matching_eval.json
 
-### Step 3 — Cross-View Matching
+# 5. IPM baseline 
+python eval_bev.py \
+    --street_manifest data/street_manifest.csv \
+    --drone_manifest  data/drone_manifest.csv \
+    --track_map_csv   outputs/track_map.csv \
+    --camera_cfg      data/camera_params.json \
+    --coord_align_csv outputs/coord_align.csv \
+    --out_report      results/bev_ipm_eval.json \
+    --out_csv         results/bev_ipm_per_track.csv
 
-Matches street detections to drone detections across synchronized frames using appearance embeddings + geometric constraints.
+# 6a. Train learned BEV model
+python bev_monolayout.py train \
+    --street_manifest data/street_manifest.csv \
+    --drone_manifest  data/drone_manifest.csv \
+    --track_map_csv   outputs/track_map.csv \
+    --coord_align_csv outputs/coord_align.csv \
+    --img_dir         data/frames/ \
+    --out_dir         checkpoints/bev_run1 \
+    --epochs          50 --batch_size 4
 
-```bash
-python pipeline/03_match_wedge_frames.py \
-    --street_manifest street_wedge_manifest.csv \
-    --drone_manifest  drone_wedge_manifest.csv \
-    --out_csv         frame_matches.csv \
-    --track_map_csv   track_mapping.csv
-```
+# 6b. Evaluate learned BEV model
+python bev_monolayout.py eval \
+    --street_manifest data/val_street.csv \
+    --drone_manifest  data/val_drone.csv \
+    --track_map_csv   outputs/val_track_map.csv \
+    --coord_align_csv outputs/coord_align.csv \
+    --img_dir         data/frames/ \
+    --checkpoint      checkpoints/bev_run1/best.pth \
+    --out_report      results/bev_learned_eval.json \
+    --vis_dir         results/bev_vis/
 
-### Step 4 — Coordinate Alignment
-
-Estimates the rigid transform between the drone coordinate frame and the camera BEV frame using RANSAC on matched object pairs.
-
-```bash
-python pipeline/04_auto_coord_align.py \
-    --street_manifest   street_wedge_manifest.csv \
-    --drone_manifest    drone_wedge_manifest.csv \
-    --frame_matches_csv frame_matches.csv \
-    --track_map_csv     track_mapping.csv \
-    --camera_cfg        camera_params.json \
-    --out_csv           coord_align.csv
-```
-
-Expected output: `scale=1.000  residual<1.0m  rot=<scene_heading_diff>`
-
-### Step 5 — IPM Baseline Evaluation
-
-```bash
-python pipeline/05_eval_bev.py \
-    --street_manifest street_wedge_manifest.csv \
-    --drone_manifest  drone_wedge_manifest.csv \
-    --track_map_csv   track_mapping.csv \
-    --camera_cfg      camera_params.json \
-    --coord_align_csv coord_align.csv \
-    --out_report      results/ipm_eval.json
-```
-
-### Step 6 — Train & Evaluate BEV Regressor
-
-```bash
-# Train (< 5 minutes on CPU, < 1 minute on GPU)
+# 7a. Train BEV Regressor(< 5 minutes on CPU, < 1 minute on GPU)
 python pipeline/06_bbox_bev_regressor.py train \
     --street_manifest street_wedge_manifest.csv \
     --drone_manifest  drone_wedge_manifest.csv \
@@ -156,7 +162,7 @@ python pipeline/06_bbox_bev_regressor.py train \
     --out_dir         checkpoints/bbox_regressor \
     --epochs          300
 
-# Evaluate
+# 7b. Evaluate BEV Regressor
 python pipeline/06_bbox_bev_regressor.py eval \
     --street_manifest street_wedge_manifest.csv \
     --drone_manifest  drone_wedge_manifest.csv \
@@ -165,6 +171,34 @@ python pipeline/06_bbox_bev_regressor.py eval \
     --camera_cfg      camera_params.json \
     --checkpoint      checkpoints/bbox_regressor/best.pth \
     --out_report      results/bbox_regressor_eval.json
+
+# 8. Visialize MonoLayout BEV
+python visulaize_mono_bev.py \
+      --street_manifest  .../street_wedge_manifest.csv \
+      --drone_manifest   .../drone_wedge_manifest.csv \
+      --track_map_csv    .../track_mapping.csv \
+      --coord_align_csv  .../coord_align.csv \
+      --camera_cfg       .../camera_params.json \
+      --checkpoint       .../best_remapped.pth \
+      --street_video     .../Galgenberg_60m_bike_head.mp4 \
+      --drone_video      .../Galgenberg_60m_drone.mp4 \
+      --img_dir          .../frames \
+      --frame            831 \
+      --out              figure3_frame831.png
+
+# 9. BBox Regressor BEV Visualization
+python visualize_bbox_regressor.py \
+      --street_manifest  .../street_wedge_manifest.csv \
+      --drone_manifest   .../drone_wedge_manifest.csv \
+      --track_map_csv    .../track_mapping.csv \
+      --coord_align_csv  .../coord_align.csv \
+      --camera_cfg       .../camera_params.json \
+      --checkpoint       .../bbox_regressor/best.pth \
+      --street_video     .../bike.mp4 \
+      --drone_video      .../drone.mp4 \
+      --img_dir          .../frames \
+      --frame            831 \
+      --out              vis_bbox/frame_831.png
 ```
 
 ---
@@ -234,13 +268,6 @@ Per-scene rigid transform: `drone_pos = R(rot_deg) × ipm_pos + offset`
 | `rot_deg` | Rotation between camera forward and drone x_fwd axis |
 | `residual_m` | Mean RANSAC inlier residual (quality indicator) |
 
-### Coordinate Systems
-
-See `docs/COORDINATE_SYSTEMS.md` for full definitions. In brief:
-
-- **Street IPM frame:** origin at camera, x=forward, y=left, z=up
-- **Drone frame:** origin at drone nadir projection on ground, x_fwd/y_left
-- **Alignment:** `drone = R(rot) × ipm + offset` — solved per scene by `auto_coord_align.py`
 
 ---
 
@@ -252,7 +279,7 @@ The dataset videos and manifests are hosted separately due to size.
 >
 > **Request access:** [TODO — add form/email]
 
-### Directory structure after download
+### Directory structure after download and wedge postprocessing
 
 ```
 data/
