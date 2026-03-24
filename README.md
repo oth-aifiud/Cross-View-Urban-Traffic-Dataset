@@ -17,7 +17,6 @@ A dataset of urban intersections recorded simultaneously from a bike-mounted GoP
 | **Classes** | Car, Truck, Bus, Person, Bicycle, Motorcycle |
 | **Task** | Cross-View feature matching and Monocular BEV object localization |
 
----
 
 This pipeline processes synchronized street-view (GoPro on bike) and drone videos
 to produce a cross-view dataset with ground-truth BEV supervision.
@@ -120,6 +119,9 @@ python eval_matching.py \
     --gt_csv          annotations/gt_track_map.csv \
     --pred_track_csv  outputs/track_map.csv \
     --pred_frame_csv  outputs/frame_matches.csv \
+    --street_manifest data/street_manifest.csv \
+    --drone_manifest data/drone_manifest.csv \
+    --near_dist_m 30 \
     --out_report      results/matching_eval.json
 
 # 5. IPM baseline 
@@ -212,7 +214,19 @@ Open:
 ```
 http://localhost:8501
 ```
+Outputs:
 
+ gt_pairs.csv
+
+Ground truth correspondences:
+```
+scene_id,street_track_id,drone_track_id,class_name
+```
+ gt_audit.csv
+
+Annotation history (optional)
+
+Then run evaluation as above (# 4. Matching evaluation )
 ---
 
 ## Results
