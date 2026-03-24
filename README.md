@@ -1,93 +1,307 @@
-# Cross-View Dataset
+# Cross-View Urban Traffic Dataset
 
+**Synchronized street-level and drone footage for Bird's-Eye View (BEV) perception research.**
 
+A dataset of urban intersections recorded simultaneously from a bike-mounted GoPro camera and a drone flying at 60m altitude. Drone detections provide accurate metric ground truth for training and evaluating BEV projection models — a capability not available in any existing monocular dataset.
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Overview
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+| | |
+|---|---|
+| **Modalities** | Street-view video (GoPro Hero 11, 4K) + Drone overhead video (4K, 60m altitude) |
+| **Sync** | Frame-synchronized 1:1 at 30 fps |
+| **Scenes** | Urban intersections, Regensburg, Germany |
+| **GT source** | Drone object detections with metric positions (x_fwd, y_left in meters) |
+| **Classes** | Car, Truck, Bus, Person, Bicycle, Motorcycle |
+| **Task** | Monocular BEV object localization |
 
-## Add your files
+---
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Repository Structure
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.oth-regensburg.de/IM/labor_ai_iud/street_level_bev_projection/cross-view-dataset.git
-git branch -M main
-git push -uf origin main
+cross-view-urban-traffic/
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+│
+├── pipeline/                        # Full processing pipeline (6 stages)
+│   ├── 01_generate_camera_params.py     # GoPro intrinsics generation / calibration
+│   ├── 02_extract_frames.py             # Extract frames from video by manifest
+│   ├── 03_match_wedge_frames.py         # Cross-view object matching (street↔drone)
+│   ├── 04_auto_coord_align.py           # Automatic coordinate alignment (IPM-based)
+│   ├── 05_eval_bev.py                   # IPM baseline evaluation
+│   └── 06_bbox_bev_regressor.py         # Detection-conditioned BEV regressor
+│
+├── models/
+│   ├── bev_monolayout.py                # MonoLayout-style image→BEV model
+│   └── bbox_bev_regressor.py            # Lightweight bbox→BEV MLP (recommended)
+│
+├── visualization/
+│   ├── visualize_bbox_regressor.py      # 4-panel BEV figure renderer
+│   └── render_bev_figure.py             # Full pipeline figure with drone overhead
+│
+├── configs/
+│   └── camera_params_example.json       # Example GoPro Hero 11 camera config
+│
+└── docs/
+    ├── PIPELINE.md                      # Step-by-step pipeline guide
+    ├── DATA_FORMAT.md                   # CSV schema documentation
+    └── COORDINATE_SYSTEMS.md            # Coordinate frame definitions
 ```
 
-## Integrate with your tools
-
-* [Set up project integrations](https://gitlab.oth-regensburg.de/IM/labor_ai_iud/street_level_bev_projection/cross-view-dataset/-/settings/integrations)
-
-## Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+git clone https://github.com/YOUR_USERNAME/cross-view-urban-traffic.git
+cd cross-view-urban-traffic
+pip install -r requirements.txt
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Requirements:**
+```
+torch>=2.0
+torchvision>=0.15
+opencv-python>=4.8
+pandas>=2.0
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+---
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Pipeline
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+The full pipeline takes raw videos and produces BEV-evaluated results in 6 steps.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Step 1 — Camera Parameters
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```bash
+# Use published GoPro specs (instant, ±1% accuracy for Linear mode)
+python pipeline/01_generate_camera_params.py spec \
+    --model hero11 --fov linear --resolution 4k \
+    --scenes scene_00 scene_01 \
+    --out camera_params.json
+
+# Or use your own calibrated intrinsics
+# Edit camera_params.json directly — see configs/camera_params_example.json
+```
+
+### Step 2 — Extract Frames
+
+```bash
+python pipeline/02_extract_frames.py \
+    --video    /path/to/street_video.mp4 \
+    --manifest /path/to/street_wedge_manifest.csv \
+    --out_dir  frames/scene_00 \
+    --scene_id scene_00
+```
+
+### Step 3 — Cross-View Matching
+
+Matches street detections to drone detections across synchronized frames using appearance embeddings + geometric constraints.
+
+```bash
+python pipeline/03_match_wedge_frames.py \
+    --street_manifest street_wedge_manifest.csv \
+    --drone_manifest  drone_wedge_manifest.csv \
+    --out_csv         frame_matches.csv \
+    --track_map_csv   track_mapping.csv
+```
+
+### Step 4 — Coordinate Alignment
+
+Estimates the rigid transform between the drone coordinate frame and the camera BEV frame using RANSAC on matched object pairs.
+
+```bash
+python pipeline/04_auto_coord_align.py \
+    --street_manifest   street_wedge_manifest.csv \
+    --drone_manifest    drone_wedge_manifest.csv \
+    --frame_matches_csv frame_matches.csv \
+    --track_map_csv     track_mapping.csv \
+    --camera_cfg        camera_params.json \
+    --out_csv           coord_align.csv
+```
+
+Expected output: `scale=1.000  residual<1.0m  rot=<scene_heading_diff>`
+
+### Step 5 — IPM Baseline Evaluation
+
+```bash
+python pipeline/05_eval_bev.py \
+    --street_manifest street_wedge_manifest.csv \
+    --drone_manifest  drone_wedge_manifest.csv \
+    --track_map_csv   track_mapping.csv \
+    --camera_cfg      camera_params.json \
+    --coord_align_csv coord_align.csv \
+    --out_report      results/ipm_eval.json
+```
+
+### Step 6 — Train & Evaluate BEV Regressor
+
+```bash
+# Train (< 5 minutes on CPU, < 1 minute on GPU)
+python pipeline/06_bbox_bev_regressor.py train \
+    --street_manifest street_wedge_manifest.csv \
+    --drone_manifest  drone_wedge_manifest.csv \
+    --track_map_csv   track_mapping.csv \
+    --coord_align_csv coord_align.csv \
+    --camera_cfg      camera_params.json \
+    --out_dir         checkpoints/bbox_regressor \
+    --epochs          300
+
+# Evaluate
+python pipeline/06_bbox_bev_regressor.py eval \
+    --street_manifest street_wedge_manifest.csv \
+    --drone_manifest  drone_wedge_manifest.csv \
+    --track_map_csv   track_mapping.csv \
+    --coord_align_csv coord_align.csv \
+    --camera_cfg      camera_params.json \
+    --checkpoint      checkpoints/bbox_regressor/best.pth \
+    --out_report      results/bbox_regressor_eval.json
+```
+
+---
+
+## Results
+
+Evaluated on 2,707 matched detection pairs across 2 intersections.
+
+| Method | ADE↓ | Median↓ | PCK@1m↑ | PCK@2m↑ |
+|---|---|---|---|---|
+| IPM (geometric baseline) | 62.9m | 13.8m | 0.0% | 0.0% |
+| **BBox Regressor (ours)** | **4.4m** | **3.5m** | **20.5%** | **32.6%** |
+
+**+92.9% improvement over IPM.** The model is trained with drone-provided metric ground truth — a supervision signal that monocular methods cannot access without this dataset.
+
+Per-class breakdown:
+
+| Class | N | IPM ADE | Regressor ADE | Δ |
+|---|---|---|---|---|
+| Car | 2225 | 61.3m | 4.6m | +92.5% |
+| Person | 163 | 5.3m | 4.1m | +23.3% |
+| Bicycle | 93 | 575.2m | 5.7m | +99.0% |
+| Bus | 185 | — | 2.5m | — |
+| Truck | 41 | — | 2.8m | — |
+
+---
+
+## Data Format
+
+Data is **not included in this repository**. See [Data Access](#data-access) below.
+
+### street_wedge_manifest.csv
+
+Per-detection records from the street camera.
+
+| Column | Type | Description |
+|---|---|---|
+| `frame` | int | Frame number (1-based, matches video timestamp) |
+| `track_id` | int | Street-side track ID |
+| `class_name` | str | Object class |
+| `bbox_x1/y1/x2/y2` | float | Bounding box in pixels |
+| `scene_id` | str | Scene identifier (e.g. `scene_00`) |
+| `crop_path` | str | Path to cropped detection image |
+
+### drone_wedge_manifest.csv
+
+Per-detection records from the drone, with metric positions.
+
+| Column | Type | Description |
+|---|---|---|
+| `street_frame` | int | Synchronized street frame number |
+| `track_id` | int | Drone-side track ID |
+| `class_name` | str | Object class |
+| `bbox_x1/y1/x2/y2` | float | Bounding box in drone image pixels |
+| `x_fwd` | float | Metric distance forward from drone nadir (m) |
+| `y_left` | float | Metric distance left from drone nadir (m) |
+| `dist_m` | float | Euclidean distance from drone nadir (m) |
+
+### coord_align.csv
+
+Per-scene rigid transform: `drone_pos = R(rot_deg) × ipm_pos + offset`
+
+| Column | Description |
+|---|---|
+| `scene_id` | Scene identifier |
+| `offset_x/y` | Translation from IPM origin to drone nadir (m) |
+| `rot_deg` | Rotation between camera forward and drone x_fwd axis |
+| `residual_m` | Mean RANSAC inlier residual (quality indicator) |
+
+### Coordinate Systems
+
+See `docs/COORDINATE_SYSTEMS.md` for full definitions. In brief:
+
+- **Street IPM frame:** origin at camera, x=forward, y=left, z=up
+- **Drone frame:** origin at drone nadir projection on ground, x_fwd/y_left
+- **Alignment:** `drone = R(rot) × ipm + offset` — solved per scene by `auto_coord_align.py`
+
+---
+
+## Data Access
+
+The dataset videos and manifests are hosted separately due to size.
+
+> **Download:** [TODO — add link when uploaded]
+>
+> **Request access:** [TODO — add form/email]
+
+### Directory structure after download
+
+```
+data/
+├── scene_00/                        # Intersection 1 (Galgenberg, Regensburg)
+│   ├── street_wedge_manifest.csv
+│   ├── drone_wedge_manifest.csv
+│   ├── track_mapping.csv
+│   ├── frame_matches.csv
+│   ├── coord_align.csv
+│   └── frames/                      # Extracted street frames (run extract_frames.py)
+│       └── scene_00/
+│           ├── 000001.jpg
+│           └── ...
+│
+└── scene_01/                        # Intersection 2 (Dr.-Martin-Luther-Str., Regensburg)
+    ├── street_wedge_manifest.csv
+    └── ...
+```
+
+---
+
+## Citation
+
+If you use this dataset in your research, please cite:
+
+```bibtex
+@dataset{crossview_urban_traffic_2026,
+  title     = {Cross-View Urban Traffic Dataset},
+  author    = {TODO},
+  year      = {2026},
+  note      = {NeurIPS 2026 submission},
+  url       = {https://github.com/YOUR_USERNAME/cross-view-urban-traffic}
+}
+```
+
+---
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+The pipeline code in this repository is licensed under the **MIT License**.
+
+The dataset (videos, manifests, annotations) is licensed under **CC BY-NC 4.0** (Creative Commons Attribution-NonCommercial 4.0 International). You may use it for research and educational purposes with attribution. Commercial use is not permitted.
+
+See [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgements
+
+- Detection and tracking: [TODO — add trackers used]
+- BEV architecture inspired by [MonoLayout](https://github.com/hbutsuak95/monolayout)
+- Recorded in Regensburg, Bavaria, Germany
