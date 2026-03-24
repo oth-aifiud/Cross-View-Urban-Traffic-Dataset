@@ -15,7 +15,7 @@ A dataset of urban intersections recorded simultaneously from a bike-mounted GoP
 | **Scenes** | Urban intersections, Regensburg, Germany |
 | **GT source** | Drone object detections with metric positions (x_fwd, y_left in meters) |
 | **Classes** | Car, Truck, Bus, Person, Bicycle, Motorcycle |
-| **Task** | Monocular BEV object localization |
+| **Task** | Cross-View feature matching and Monocular BEV object localization |
 
 ---
 
