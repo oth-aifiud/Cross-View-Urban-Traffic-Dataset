@@ -284,7 +284,7 @@ If you use this dataset in your research, please cite:
   author    = {TODO},
   year      = {2026},
   note      = {NeurIPS 2026 submission},
-  url       = {https://github.com/YOUR_USERNAME/cross-view-urban-traffic}
+  url       = {https://gitlab.oth-regensburg.de/IM/labor_ai_iud/street_level_bev_projection/cross-view-dataset/}
 }
 ```
 
