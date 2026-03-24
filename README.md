@@ -4,8 +4,8 @@
 
 A dataset of urban intersections recorded simultaneously from a bike-mounted GoPro camera and a drone flying at 60m altitude. Drone detections provide accurate metric ground truth for training and evaluating BEV projection models — a capability not available in any existing monocular dataset.
 
----
 
+---
 ## Overview
 
 | | |
@@ -26,15 +26,15 @@ to produce a cross-view dataset with ground-truth BEV supervision.
 Raw Videos (street + drone) with annotations
         │
         ▼
-  [post processing for wedge exports]
+  [scene_manifest.csv]
         │
         ▼
   Street Manifest + Drone Manifest CSVs
         │
-        ├──► SCRIPT 1: match_wedge_frames.py   ── (Cross-view ID matching)
+        ├──► SCRIPT 1: matching_pipeline.py   ── (Cross-view ID matching pipeline)
         │           │
         │           ▼
-        │    frame_matches.csv + track_map.csv
+        │    frame_matches.csv + track_map.csv + (wedge manifests & CLIP embeddings)
         │           │
         │     ┌─────┴──────────────────────┐
         │     ▼                            ▼
@@ -55,12 +55,6 @@ Raw Videos (street + drone) with annotations
                                           ▼                                      ▼
                                         SCRIPT 8: visualize_mono_bev.py        SCRIPT 9: visualize_bbox_regressor.py
 
-## Installation
-
-```bash
-git clone https://github.com/YOUR_USERNAME/cross-view-urban-traffic.git
-cd cross-view-urban-traffic
-pip install -r requirements.txt
 ```
 
 **Requirements:**
@@ -75,24 +69,31 @@ matplotlib>=3.7
 ```
 
 ---
+## Installation
+
+```bash
+git clone https://github.com/YOUR_USERNAME/cross-view-urban-traffic.git
+cd cross-view-urban-traffic
+pip install -r requirements.txt
+```
+
+---
 
 ## Pipeline
 
 The full pipeline takes raw videos and produces BEV-evaluated resuts.
 
 ```bash
-# 1. Cross-view matching
+# 1. Cross-view matching pipeline
 **Purpose:** Core cross-view ID matching. Matches street tracks to drone tracks
 using CLIP embeddings + angular geometry + distance ranking.
 Runs two passes: near objects (appearance-dominant) and far objects
 (geometry-dominant). Outputs frame-level matches and voted track-level map.
-python match_wedge_frames.py \
-    --street_manifest data/street_manifest.csv \
-    --drone_manifest  data/drone_manifest.csv \
-    --street_emb_npz  embeddings/street_emb.npz \
-    --drone_emb_npz   embeddings/drone_emb.npz \
-    --out_frame_csv   outputs/frame_matches.csv \
-    --out_track_map_csv outputs/track_map.csv
+python matching_pipeline.py \
+  --scene_csv dataset/scene_manifest.csv \
+  --export_wedge_script export_wedge_crops.py \
+  --embed_script clip_wedge_embeddings.py \
+  --match_script match_wedge_frames.py
 
 # 2. Auto coordinate alignment (depth mode recommended)
 python auto_coord_align.py \
@@ -199,6 +200,17 @@ python visualize_bbox_regressor.py \
       --img_dir          .../frames \
       --frame            831 \
       --out              vis_bbox/frame_831.png
+```
+
+---
+## Matches Ground Truth Annotation framework
+We provide a Streamlit UI for fast annotation.
+```
+streamlit run annotate_web_frames.py --server.port 8501 --server.address 0.0.0.0
+```
+Open:
+```
+http://localhost:8501
 ```
 
 ---
