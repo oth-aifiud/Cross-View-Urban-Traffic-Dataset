@@ -226,7 +226,8 @@ scene_id,street_track_id,drone_track_id,class_name
 
 Annotation history (optional)
 
-Then run evaluation as above (# 4. Matching evaluation )
+Then run evaluation as above (4. Matching evaluation )
+
 ---
 
 ## Results
@@ -308,21 +309,54 @@ The dataset videos and manifests are hosted separately due to size.
 ### Directory structure after download and wedge postprocessing
 
 ```
-data/
-├── scene_00/                        # Intersection 1 (Galgenberg, Regensburg)
-│   ├── street_wedge_manifest.csv
-│   ├── drone_wedge_manifest.csv
-│   ├── track_mapping.csv
-│   ├── frame_matches.csv
-│   ├── coord_align.csv
-│   └── frames/                      # Extracted street frames (run extract_frames.py)
-│       └── scene_00/
-│           ├── 000001.jpg
-│           └── ...
+dataset/
 │
-└── scene_01/                        # Intersection 2 (Dr.-Martin-Luther-Str., Regensburg)
-    ├── street_wedge_manifest.csv
-    └── ...
+├── scene_manifest.csv              # MASTER file (all scenes)
+│
+├── scenes/
+│   ├── scene_00/
+│   │   ├── raw/
+│   │   │   ├── street.mp4
+│   │   │   ├── drone.mp4
+│   │   │
+│   │   │   ├── street_annotations.csv
+│   │   │   ├── drone_annotations.csv
+│   │   │
+│   │   │   └── gt_pairs.csv        # Cross-view GT (manual)
+│   │   │
+│   │   ├── processed/
+│   │   │   ├── wedge/
+│   │   │   │   ├── street_wedge_manifest.csv
+│   │   │   │   ├── drone_wedge_manifest.csv
+│   │   │   │   ├── frame_matches.csv
+│   │   │   │   ├── track_mapping.csv
+│   │   │   │   └── coord_align.csv
+│   │   │   │
+│   │   │   ├── embeddings/
+│   │   │   │   ├── street_emb.npz
+│   │   │   │   └── drone_emb.npz
+│   │   │   │
+│   │   │   └── frames/
+│   │   │       ├── street/
+│   │   │       │   ├── 000001.jpg
+│   │   │       │   └── ...
+│   │   │       │
+│   │   │       └── drone/
+│   │   │           ├── 000001.jpg
+│   │   │           └── ...
+│   │   │
+│   │   └── eval/
+│   │       └── eval_report.json
+│   │
+│   ├── scene_01/
+│   │   └── ...
+│   │
+│   └── ...
+│
+└── global/
+    ├── camera_params.json
+    ├── scene_metadata.csv
+    └── README.md
 ```
 
 ---
