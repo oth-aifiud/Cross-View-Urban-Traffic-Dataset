@@ -56,24 +56,17 @@ Raw Videos (street + drone) with annotations
 
 ```
 
-**Requirements:**
-```
-torch>=2.0
-torchvision>=0.15
-opencv-python>=4.8
-pandas>=2.0
-numpy>=1.24
-scipy>=1.10
-matplotlib>=3.7
-```
-
 ---
 ## Installation
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/cross-view-urban-traffic.git
 cd cross-view-urban-traffic
-pip install -r requirements.txt
+# Option: full reproducibility
+conda env create -f environment.yml
+conda activate crossview
+
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 ```
 
 ---
