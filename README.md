@@ -77,10 +77,11 @@ The full pipeline takes raw videos and produces BEV-evaluated resuts.
 
 ```bash
 # 1. Cross-view matching pipeline
-**Purpose:** Core cross-view ID matching. Matches street tracks to drone tracks
-using CLIP embeddings + angular geometry + distance ranking.
-Runs two passes: near objects (appearance-dominant) and far objects
-(geometry-dominant). Outputs frame-level matches and voted track-level map.
+ Purpose: Core cross-view ID matching. Matches street tracks to drone tracks
+ using CLIP embeddings + angular geometry + distance ranking.
+ Runs two passes: near objects (appearance-dominant) and far objects
+ (geometry-dominant). Outputs frame-level matches and voted track-level map.
+
 python matching_pipeline.py \
   --scene_csv dataset/scene_manifest.csv \
   --export_wedge_script export_wedge_crops.py \
