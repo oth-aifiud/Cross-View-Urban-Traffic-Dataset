@@ -7,18 +7,18 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=5.1=1_gnu
-  - ffmpeg=4.2.2=h20bf706_0
-  - jpeg=9e=h5eee18b_3
-  - numpy=1.26.4=py311h24aa872_0
-  - numpy-base=1.26.4=py311hbfb1bba_0
-  - opencv=4.6.0=py311h10ae9b0_5
-  - openh264=2.1.1=h4ff587b_0
-  - openjpeg=2.5.2=he7f1fd0_0
-  - openssl=3.6.1=h35e630c_1
-  - pip=25.0=py311h06a4308_0
-  - pthread-stubs=0.4=hb9d3cd8_1002
-  - python=3.11.11=he870216_0
-  - wheel=0.45.1=py311h06a4308_0
+  - ffmpeg=4.2.2
+  - jpeg=9e
+  - numpy=1.26.4
+  - numpy-base=1.26.4
+  - opencv=4.6.0
+  - openh264=2.1.1
+  - openjpeg=2.5.2
+  - openssl=3.6.1
+  - pip=25.0
+  - pthread-stubs=0.4
+  - python=3.11.11
+  - wheel=0.45.1
   - pip:
       - affine==2.4.0
       - altair==6.0.0
