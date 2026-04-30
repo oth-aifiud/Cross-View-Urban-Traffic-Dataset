@@ -2,7 +2,7 @@
 
 This page documents the **batch-mode commands** used to run the full benchmark across all scenes listed in a processed scene manifest.
 
-It is intended for the GitHub repository and assumes you already have a valid `processed_scene_manifest.csv` with per-scene file paths and split metadata.
+It is assumed you already have a valid `processed_scene_manifest.csv` with per-scene file paths and split metadata.
 
 ---
 
@@ -268,7 +268,6 @@ For BEV baselines, only scenes with reliable alignment should be included by def
 7. Run batch_eval_ipm_bev.py
 8. Train/eval bev_monolayout.py
 9. Train/eval bbox_bev_regressor.py
-10. Export tables for the paper
 ```
 
 ---
@@ -300,17 +299,6 @@ results/
 
 ---
 
-## 12. Notes
-
-- `scene_csv` batch mode is the recommended way to run all final experiments.
-- Keep raw data paths and generated output paths separate.
-- Scene-level manifests make the benchmark reproducible and easy to extend.
-- For paper reporting, always state whether a result uses:
-  - all evaluated scenes
-  - only aligned scenes
-  - train/val/test scene-level splits
-
----
 
 ## 13. Summary
 
@@ -319,6 +307,5 @@ The batch scripts provide a reproducible way to:
 - process all scenes consistently
 - evaluate cross-view matching across the whole benchmark
 - train and test BEV baselines at scene level
-- generate aggregate numbers for the paper
+- generate aggregate numbers
 
-This is the recommended setup for final benchmark reporting and future public GitHub usage.
