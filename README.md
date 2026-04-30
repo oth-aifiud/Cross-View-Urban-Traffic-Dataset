@@ -37,22 +37,22 @@ Raw Videos (street + drone) with annotations
         │           │
         │     ┌─────┴──────────────────────┐
         │     ▼                            ▼
-        │  SCRIPT 2: eval_matching.py    SCRIPT 3: dataset_stats.py
+        │  SCRIPT 1a: eval_matching.py    SCRIPT 3: dataset_stats.py
         │  (benchmark: P/R/F1)           
         │
-        └──► SCRIPT 4: auto_coord_align.py  ── Auto coordinate alignment
+        └──► SCRIPT 2: auto_coord_align.py  ── Auto coordinate alignment
                    │   (uses near matches + optional Depth Anything V2)
                    ▼
             coord_align.csv  (replaces manual per-scene measurement)
                    │
              ┌─────┴──────────────────────┐───────────────────────────────────────┐
              ▼                            ▼                                       ▼
-          SCRIPT 5: eval_ipm_bev.py      SCRIPT 6: bev_monolayout.py.          SCRIPT 7: bbox_bev_regressor.py
+          SCRIPT 4: eval_ipm_bev.py      SCRIPT 5: bev_monolayout.py.          SCRIPT 6: bbox_bev_regressor.py
           (IPM baseline benchmark)       (learning-based BEV model).           (Detection-Conditioned BEV Position Regressor)
                                          (train + eval)                        (train + eval) 
                                           │                                      │
                                           ▼                                      ▼
-                                        SCRIPT 8: visualize_mono_bev.py        SCRIPT 9: visualize_bbox_regressor.py
+                                        SCRIPT 7: visualize_mono_bev.py        SCRIPT 8: visualize_bbox_regressor.py
 
 ```
 
@@ -118,17 +118,7 @@ python dataset_stats.py \
     --out_json        results/dataset_stats.json \
     --out_csv         results/per_scene_stats.csv
 
-# 4. Matching evaluation 
-python eval_matching.py \
-    --gt_csv          annotations/gt_track_map.csv \
-    --pred_track_csv  outputs/track_map.csv \
-    --pred_frame_csv  outputs/frame_matches.csv \
-    --street_manifest data/street_manifest.csv \
-    --drone_manifest data/drone_manifest.csv \
-    --near_dist_m 30 \
-    --out_report      results/matching_eval.json
-
-# 5. IPM baseline 
+# 4. IPM baseline 
 python eval_bev.py \
     --street_manifest data/street_manifest.csv \
     --drone_manifest  data/drone_manifest.csv \
@@ -138,7 +128,7 @@ python eval_bev.py \
     --out_report      results/bev_ipm_eval.json \
     --out_csv         results/bev_ipm_per_track.csv
 
-# 6a. Train learned BEV model
+# 5a. Train learned BEV model
 python bev_monolayout.py train \
     --street_manifest data/street_manifest.csv \
     --drone_manifest  data/drone_manifest.csv \
@@ -148,7 +138,7 @@ python bev_monolayout.py train \
     --out_dir         checkpoints/bev_run1 \
     --epochs          50 --batch_size 4
 
-# 6b. Evaluate learned BEV model
+# 5b. Evaluate learned BEV model
 python bev_monolayout.py eval \
     --street_manifest data/val_street.csv \
     --drone_manifest  data/val_drone.csv \
@@ -159,7 +149,7 @@ python bev_monolayout.py eval \
     --out_report      results/bev_learned_eval.json \
     --vis_dir         results/bev_vis/
 
-# 7a. Train BEV Regressor(< 5 minutes on CPU, < 1 minute on GPU)
+# 6a. Train BEV Regressor(< 5 minutes on CPU, < 1 minute on GPU)
 python pipeline/06_bbox_bev_regressor.py train \
     --street_manifest street_wedge_manifest.csv \
     --drone_manifest  drone_wedge_manifest.csv \
@@ -169,7 +159,7 @@ python pipeline/06_bbox_bev_regressor.py train \
     --out_dir         checkpoints/bbox_regressor \
     --epochs          300
 
-# 7b. Evaluate BEV Regressor
+# 6b. Evaluate BEV Regressor
 python pipeline/06_bbox_bev_regressor.py eval \
     --street_manifest street_wedge_manifest.csv \
     --drone_manifest  drone_wedge_manifest.csv \
@@ -179,7 +169,7 @@ python pipeline/06_bbox_bev_regressor.py eval \
     --checkpoint      checkpoints/bbox_regressor/best.pth \
     --out_report      results/bbox_regressor_eval.json
 
-# 8. Visialize MonoLayout BEV
+# 7. Visialize MonoLayout BEV
 python visulaize_mono_bev.py \
       --street_manifest  .../street_wedge_manifest.csv \
       --drone_manifest   .../drone_wedge_manifest.csv \
@@ -193,7 +183,7 @@ python visulaize_mono_bev.py \
       --frame            831 \
       --out              figure3_frame831.png
 
-# 9. BBox Regressor BEV Visualization
+# 8. BBox Regressor BEV Visualization
 python visualize_bbox_regressor.py \
       --street_manifest  .../street_wedge_manifest.csv \
       --drone_manifest   .../drone_wedge_manifest.csv \
