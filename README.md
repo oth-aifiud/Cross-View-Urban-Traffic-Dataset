@@ -283,7 +283,7 @@ dataset/
 │   │   ├── raw/
 │   │   │   ├── street.mp4
 │   │   │   ├── drone.mp4
-│   │   │
+│   │   │   
 │   │   │   ├── street_annotations.csv
 │   │   │   ├── drone_annotations.csv
 │   │   │
@@ -320,7 +320,6 @@ dataset/
 │
 └── global/
     ├── camera_params.json
-    ├── scene_metadata.csv
     └── README.md
 ```
 
