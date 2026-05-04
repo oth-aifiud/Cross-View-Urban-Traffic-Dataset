@@ -226,29 +226,6 @@ Then run evaluation as above (4. Matching evaluation )
 
 ---
 
-## Results
-
-Evaluated on 2,707 matched detection pairs across 2 intersections.
-
-| Method | ADE↓ | Median↓ | PCK@1m↑ | PCK@2m↑ |
-|---|---|---|---|---|
-| IPM (geometric baseline) | 62.9m | 13.8m | 0.0% | 0.0% |
-| **BBox Regressor (ours)** | **4.4m** | **3.5m** | **20.5%** | **32.6%** |
-
-**+92.9% improvement over IPM.** The model is trained with drone-provided metric ground truth — a supervision signal that monocular methods cannot access without this dataset.
-
-Per-class breakdown:
-
-| Class | N | IPM ADE | Regressor ADE | Δ |
-|---|---|---|---|---|
-| Car | 2225 | 61.3m | 4.6m | +92.5% |
-| Person | 163 | 5.3m | 4.1m | +23.3% |
-| Bicycle | 93 | 575.2m | 5.7m | +99.0% |
-| Bus | 185 | — | 2.5m | — |
-| Truck | 41 | — | 2.8m | — |
-
----
-
 ## Data Format
 
 Data is **not included in this repository**. See [Data Access](#data-access) below.
@@ -293,14 +270,6 @@ Per-scene rigid transform: `drone_pos = R(rot_deg) × ipm_pos + offset`
 
 
 ---
-
-## Data Access
-
-The dataset videos and manifests are hosted separately due to size.
-
-> **Download:** [TODO — add link when uploaded]
->
-> **Request access:** [TODO — add form/email]
 
 ### Directory structure after download and wedge postprocessing
 
