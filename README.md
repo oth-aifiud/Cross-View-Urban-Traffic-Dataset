@@ -4,6 +4,8 @@
 
 A dataset of urban intersections recorded simultaneously from a bike-mounted GoPro camera and a drone flying at 60m altitude. Drone detections provide accurate metric ground truth for training and evaluating BEV projection models — a capability not available in any existing monocular dataset.
 
+[![Dataset](https://img.shields.io/badge/Dataset-Download-8BC34A?style=for-the-badge)](https://huggingface.co/datasets/prakharbh/CrossViewUrbanTrafficDataset)
+
 
 ---
 ## Overview
