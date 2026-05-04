@@ -297,18 +297,10 @@ dataset/
 │   │   │   │   ├── track_mapping.csv
 │   │   │   │   └── coord_align.csv
 │   │   │   │
-│   │   │   ├── embeddings/
-│   │   │   │   ├── street_emb.npz
-│   │   │   │   └── drone_emb.npz
-│   │   │   │
-│   │   │   └── frames/
-│   │   │       ├── street/
-│   │   │       │   ├── 000001.jpg
-│   │   │       │   └── ...
-│   │   │       │
-│   │   │       └── drone/
-│   │   │           ├── 000001.jpg
-│   │   │           └── ...
+│   │   │   └── embeddings/
+│   │   │       ├── street_emb.npz
+│   │   │       └── drone_emb.npz
+│   │   │   
 │   │   │
 │   │   └── eval/
 │   │       └── eval_report.json
