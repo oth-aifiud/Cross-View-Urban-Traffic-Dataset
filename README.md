@@ -199,7 +199,7 @@ python visualize_bbox_regressor.py \
       --frame            831 \
       --out              vis_bbox/frame_831.png
 ```
-
+For whole-dataset processing and evaluation across multiple scenes, use the batch scripts in the batch_scripts/ directory
 ---
 ## Matches Ground Truth Annotation framework
 We provide a Streamlit UI for fast annotation.
