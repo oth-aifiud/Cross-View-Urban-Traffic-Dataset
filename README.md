@@ -225,7 +225,7 @@ Annotation history (optional)
 
 Then run evaluation as above (4. Matching evaluation )
 
-**to extract video frames needed by the pipeline, use /scripts/extract_frames.py (usuge given in the script file)**
+**to extract video frames needed by the pipeline, use /scripts/extract_frames.py (usage given in the script file)**
 
 ---
 
