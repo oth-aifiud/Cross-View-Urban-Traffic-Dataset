@@ -291,29 +291,22 @@ dataset/
 │   │   │   └── gt_pairs.csv        # Cross-view GT (manual)
 │   │   │
 │   │   ├── processed/
-│   │   │   ├── wedge/
-│   │   │   │   ├── street_wedge_manifest.csv
-│   │   │   │   ├── drone_wedge_manifest.csv
-│   │   │   │   ├── frame_matches.csv
-│   │   │   │   ├── track_mapping.csv
-│   │   │   │   └── coord_align.csv
-│   │   │   │
-│   │   │   └── embeddings/
-│   │   │       ├── street_emb.npz
-│   │   │       └── drone_emb.npz
-│   │   │   
-│   │   │
-│   │   └── eval/
-│   │       └── eval_report.json
-│   │
+│   │      ├── wedge/
+│   │      │   ├── street_wedge_manifest.csv
+│   │      │   ├── drone_wedge_manifest.csv
+│   │      │   ├── frame_matches.csv
+│   │      │   └── track_mapping.csv
+│   │      │    
+│   │      │
+│   │      └── embeddings/
+│   │          ├── street_emb.npz
+│   │          └── drone_emb.npz 
+│   │   
 │   ├── scene_01/
 │   │   └── ...
 │   │
 │   └── ...
-│
-└── global/
-    ├── camera_params.json
-    └── README.md
+
 ```
 
 ---
