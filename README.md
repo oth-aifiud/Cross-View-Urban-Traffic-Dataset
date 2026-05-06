@@ -224,6 +224,7 @@ scene_id,street_track_id,drone_track_id,class_name
 Annotation history (optional)
 
 Then run evaluation as above (4. Matching evaluation )
+**to extract video frames needed by the pipeline, use /scripts/extract_frames.py (usuage given in the script file) **
 
 ---
 
