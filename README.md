@@ -6,6 +6,8 @@ A dataset of urban intersections recorded simultaneously from a bike-mounted GoP
 
 [![Dataset](https://img.shields.io/badge/Dataset-Download-8BC34A?style=for-the-badge)](https://huggingface.co/datasets/prakharbh/CrossViewUrbanTrafficDataset)
 
+![Cross-view matching example](visualization/crossview-matching.png)
+
 
 ---
 ## Overview
