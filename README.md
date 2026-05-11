@@ -320,12 +320,12 @@ dataset/
 If you use this dataset in your research, please cite:
 
 ```bibtex
-@dataset{crossview_urban_traffic_2026,
-  title     = {Cross-View Urban Traffic Dataset},
-  author    = {TODO},
-  year      = {2026},
-  note      = {NeurIPS 2026 submission},
-  url       = {https://gitlab.oth-regensburg.de/IM/labor_ai_iud/street_level_bev_projection/cross-view-dataset/}
+@misc{cvutd2026,
+  title        = {Cross-View Urban Traffic Dataset: Drone-Supervised Ground Truth for Monocular Bird's-Eye View Localization},
+  author       = {Prakhar Bhardwaj and Simone Weikl and Kilian Mang and Elia Jonas Sandtner},
+  year         = {2026},
+  howpublished = {Preprint},
+  url          = {https://www.researchgate.net/publication/404720347_Cross-View_Urban_Traffic_Dataset_Drone-Supervised_Ground_Truth_for_Monocular_Bird%27s-Eye_View_Localization}
 }
 ```
 
