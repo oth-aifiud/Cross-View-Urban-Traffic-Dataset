@@ -320,12 +320,14 @@ dataset/
 If you use this dataset in your research, please cite:
 
 ```bibtex
-@misc{cvutd2026,
-  title        = {Cross-View Urban Traffic Dataset: Drone-Supervised Ground Truth for Monocular Bird's-Eye View Localization},
-  author       = {Prakhar Bhardwaj and Simone Weikl and Kilian Mang and Elia Jonas Sandtner},
-  year         = {2026},
-  howpublished = {Preprint},
-  url          = {https://www.researchgate.net/publication/404720347_Cross-View_Urban_Traffic_Dataset_Drone-Supervised_Ground_Truth_for_Monocular_Bird%27s-Eye_View_Localization}
+@misc{bhardwaj2026crossviewurbantrafficdataset,
+      title={Cross-View Urban Traffic Dataset: Drone-Supervised Ground Truth for Monocular Bird's-Eye View Localization}, 
+      author={Prakhar Bhardwaj and Simone Weikl and Kilian Mang and Elia Jonas Sandtner},
+      year={2026},
+      eprint={2606.07708},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2606.07708}, 
 }
 ```
 
